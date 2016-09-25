@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="/bootstrap/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="/bootstrap/font-awesome.css">
+    <script src="/bootstrap/jquery-1.js"></script>
+    <script src="/bootstrap/bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="/template/default.css" />
+</head>
+<body>
+<div class="head">
+    <h1>Welcome Home</h1>
+    <div>Be hungry, be foolish @刘创</div>
+</div>
+<div class="sidebar-menu">
+    <a href="/" class="nav-header menu-first collapsed"><i class="icon-user-md icon-large"></i> 首页</a>
+    <ul class="nav nav-list collapse menu-second"></ul>
+        <a href="#userMeun1" class="nav-header menu-first collapsed" data-toggle="collapse"><i class="icon-user-md icon-large"></i> 经验之谈</a>
+    <ul class="nav nav-list collapse menu-second in">
+                <li class="active"><a href="/skill/lottery.html"><i class="icon-edit"></i> 从一个抽奖环节说起</a></li>
+                <li class=""><a href="/git/git_2thday.html"><i class="icon-edit"></i> git日记第一天</a></li>
+                <li class=""><a href="/git/git_3thday.html"><i class="icon-edit"></i> git日记第三天</a></li>
+            </ul>
+        <a href="#userMeun1" class="nav-header menu-first collapsed" data-toggle="collapse"><i class="icon-user-md icon-large"></i> 框架设计</a>
+    <ul class="nav nav-list collapse menu-second in">
+                <li class=""><a href="/design/design_1thday.html"><i class="icon-edit"></i> 框架设计(一)</a></li>
+            </ul>
+        <a href="#userMeun1" class="nav-header menu-first collapsed" data-toggle="collapse"><i class="icon-user-md icon-large"></i> 思考杂谈</a>
+    <ul class="nav nav-list collapse menu-second in">
+                <li class=""><a href="/think/think_1thday.html"><i class="icon-edit"></i> 思考(一)</a></li>
+            </ul>
+    </div>
+<div class="content"><h5>背景</h5><pre><code>游戏社区, 用于游戏的预热, 新版本发布前容许用户使用已有积分或根据规则获取积分, 积分兑换抽奖券,抽奖消耗抽奖券
+用户50w+
+每天不定时抽奖, 每人每天抽奖限制3次 兑换6次
+</code></pre><h5>功能聚焦</h5><pre><code>获取积分, 抽奖消耗积分
+</code></pre><h5>使用架构:</h5><pre><code>Service -&gt; Cache -&gt; DB
+</code></pre><h5>存在的问题:</h5><pre><code>1抽奖活动为读写密集型 每次抽奖都有一次写入(需求方需要将谢谢参与也做为一个奖项, 略坑)
+产品这样上的设计对开发来说就是噩梦, 意味这每次抽奖都有至少一次数据写入,大大增加了数据的写压力
+</code></pre><pre><code>2活动有开启时, 奖品数量每抽到一个数量减1(有没有看到熟悉的身影?, 秒杀)
+奖品数量设置限制, 那么这个数量必然成为热点1
+</code></pre><pre><code>3增加缓存层
+在并发读写的情况下无疑增加了数据不一致的风险
+</code></pre><h5>进阶 VS 进化</h5><pre><code>1产品设计, 对谢谢参与进行特殊处理(不存入数据库 减少写压力)
+
+2抽奖限制: 将更新数据库变成更新缓存 分散数据库的写压力
+        $num = $redis-&gt;get($key);
+        if ($num &gt; n) {
+            $last = $redis-&gt;decrBy($key, 1);
+            if ($last &gt; 0) {
+                ....
+            }
+        }
+    同样,对用户的抽奖次数限制也可以用计数器实现
+
+3频繁读写, 对特殊数据需要穿透缓存处理
+</code></pre></div>
+</body>
+</html>
