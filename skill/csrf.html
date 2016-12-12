@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="/bootstrap/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="/bootstrap/font-awesome.css">
+    <script src="/bootstrap/jquery-1.js"></script>
+    <script src="/bootstrap/bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="/template/default.css" />
+</head>
+<body>
+<div class="head">
+    <h1>Welcome Home</h1>
+    <div>Be hungry, be foolish @刘创</div>
+</div>
+<div class="sidebar-menu">
+    <a href="/" class="nav-header menu-first collapsed"><i class="icon-user-md icon-large"></i> 首页</a>
+    <ul class="nav nav-list collapse menu-second"></ul>
+        <a href="#userMeun1" class="nav-header menu-first collapsed" data-toggle="collapse"><i class="icon-user-md icon-large"></i> 经验之谈</a>
+    <ul class="nav nav-list collapse menu-second in">
+                <li class=""><a href="/skill/lottery.html"><i class="icon-edit"></i> 从一个抽奖环节说起</a></li>
+                <li class="active"><a href="/skill/csrf.html"><i class="icon-edit"></i> 不得不说之CSRF漏洞防范</a></li>
+                <li class=""><a href="/git/git_2thday.html"><i class="icon-edit"></i> git日记第一天</a></li>
+                <li class=""><a href="/git/git_3thday.html"><i class="icon-edit"></i> git日记第三天</a></li>
+            </ul>
+        <a href="#userMeun1" class="nav-header menu-first collapsed" data-toggle="collapse"><i class="icon-user-md icon-large"></i> 框架设计</a>
+    <ul class="nav nav-list collapse menu-second in">
+                <li class=""><a href="/design/design_1thday.html"><i class="icon-edit"></i> 框架设计(一)</a></li>
+            </ul>
+        <a href="#userMeun1" class="nav-header menu-first collapsed" data-toggle="collapse"><i class="icon-user-md icon-large"></i> 思考杂谈</a>
+    <ul class="nav nav-list collapse menu-second in">
+                <li class=""><a href="/think/think_1thday.html"><i class="icon-edit"></i> 思考(一)</a></li>
+            </ul>
+    </div>
+<div class="content"><h3>不得不说之CSRF漏洞防范</h3><pre><code>说明: CSRF（Cross-site request forgery），中文名称：跨站请求伪造
+</code></pre><h4>CSRF可以做的事</h4><pre><code>攻击者盗用用户cookie, 伪造用户请求, 可能造成的风险: 用户信息泄露&amp;财产安全
+</code></pre><h4>典型场景</h4><pre><code>1.用户登录A网站 本地保存cookie
+2.用户访问有问题的B网站, 然而B网站上会存在隐藏的image标签&lt;img src=&quot;http://A.com/orders?act=delete&amp;id=100&quot;&gt;
+此时image的请求会携带A的cookie 因为A登录了 那么image里的请求会被执行, 然后... Your gate was opened
+然而这种写代码的陋习屡见不鲜, 因为大家都信任自己网站的cookie, 这只是一个例子: 未授权的更新,删除,确认,转账等等想想就知道了
+</code></pre><h4>预防思路</h4><pre><code>L1: 对敏感操作限制GET请求, 只使用POST, 这样一般页面的GET伪造请求 基本上就算挡住了
+
+L2: 针对攻击者在iframe里发起的表单提交, 只限制GET显然不够, 加随机数显然是个好办法
+
+随机数的加法:
+    第一种方式: 进入页面是生成随机数, 提交的时候附带上该随机数做验证, 这样可以完全过滤掉其他网站上的伪造请求.
+
+        问题: 客户端页面打开多个服务端的随机数怎么存的问题, 直接覆盖可能会导致客户部分正常的请求验证失败
+              不直接覆盖。如果每次访问页面服务端都维持一个key,给服务端的处理显然带来负担
+
+    第二种方式: 登录后生成随机数cookie, 提交请求时, 将cookie里的随机数作为表单的一部分提交, 从而进行验证.
+
+        问题: 这种方式的前提是基于一个事实. 即浏览器中的A网站的cookie不能被B网站读取, 依然不能保证传输过程被抓包.
+        解决方式: https
+</code></pre></div>
+</body>
+</html>
