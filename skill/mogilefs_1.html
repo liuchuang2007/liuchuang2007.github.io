@@ -20,15 +20,18 @@
         <ul class="nav nav-list collapse menu-second in">
                 <li class=""><a href="/skill/lottery.html"><i class="icon-edit"></i> 关于抽奖的小程序</a></li>
                 <li class=""><a href="/skill/csrf.html"><i class="icon-edit"></i> 关于CSRF漏洞防范</a></li>
-                <li class="active"><a href="/skill/mogilefs_1.html"><i class="icon-edit"></i> mogilefs系统优化</a></li>
+                <li class="active"><a href="/skill/mogilefs_1.html"><i class="icon-edit"></i> mogilefs文件系统</a></li>
+                <li class=""><a href="/skill/mogilefs_2.html"><i class="icon-edit"></i> mogilefs安装与部署</a></li>
+                <li class=""><a href="/skill/mogilefs_3.html"><i class="icon-edit"></i> mogilefs集群配置说明</a></li>
+                <li class=""><a href="/skill/mogilefs_4.html"><i class="icon-edit"></i> mogilefs使用tips</a></li>
             </ul>
     </div>
-<div class="content"><h4>关于mogilefs</h4><pre><code>mogilefs作为一个停止维护的文件系统已经很多年, 然而作为一个久经考验的文件系统, 依然有它的可取之处。
+<div class="content"><h4>关于mogilefs</h4><pre><code>mogilefs虽然已成为一个基本停止维护的文件系统, 然而作为一个久经考验的文件系统, 依然有它的可取之处。
 作为一个文件系统, 需要满足一下几个基本条件:
-    -- 性能(支持并发读写)
+    -- 性能(并发读写)
     -- 可用性(灾备)
-    -- 伸缩性(平滑扩容)
-从以上角度来说, mogilefs无疑可以满足千万级或以下(Ext4)文件系统的部署和使用需求
-</code></pre><h5>模型的变迁</h5><pre><code>关于CRM</code></pre></div>
+    -- 伸缩性(扩容)
+从以上角度来说, mogilefs无疑可以满足千万级(Ext4)文件系统的部署和使用需求
+</code></pre><h5>实例模型</h5><p><img src="/images/skill/opt_mogilefs.png" alt="" title=""></p><ul><li><p>优化后压测性能(800k图片持续两小时 count/min)</p></li></ul><p><img src="/images/skill/mps_mogilefs.png" alt="" title=""></p></div>
 </body>
 </html>

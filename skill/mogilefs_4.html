@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="/bootstrap/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="/bootstrap/font-awesome.css">
+    <script src="/bootstrap/jquery-1.js"></script>
+    <script src="/bootstrap/bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="/template/default.css" />
+</head>
+<body>
+<div class="head">
+    <h1>Welcome Home</h1>
+    <div>Be hungry, be foolish @晓枫</div>
+</div>
+<div class="sidebar-menu">
+    <a href="/" class="nav-header menu-first collapsed"><i class="icon-user-md icon-large"></i> 首页</a>
+    <ul class="nav nav-list collapse menu-second"></ul>
+        <ul class="nav nav-list collapse menu-second in">
+                <li class=""><a href="/skill/lottery.html"><i class="icon-edit"></i> 关于抽奖的小程序</a></li>
+                <li class=""><a href="/skill/csrf.html"><i class="icon-edit"></i> 关于CSRF漏洞防范</a></li>
+                <li class=""><a href="/skill/mogilefs_1.html"><i class="icon-edit"></i> mogilefs文件系统</a></li>
+                <li class=""><a href="/skill/mogilefs_2.html"><i class="icon-edit"></i> mogilefs安装与部署</a></li>
+                <li class=""><a href="/skill/mogilefs_3.html"><i class="icon-edit"></i> mogilefs集群配置说明</a></li>
+                <li class="active"><a href="/skill/mogilefs_4.html"><i class="icon-edit"></i> mogilefs使用tips</a></li>
+            </ul>
+    </div>
+<div class="content"><h3>mogilefs使用tips</h3><h4>图片储存过程</h4><p><img src="/images/skill/read_proc.png" alt="" title=""></p><h4>查看/修改文件备份数</h4><pre><code> &gt; mogadm domain list
+ domain               class                mindevcount   replpolicy   hashtype
+-------------------- -------------------- ------------- ------------ -------
+ common_file          default                   2        MultipleHosts() NONE
+
+ 可通过命令设置备份数:
+
+    &gt; mogadm class modify --mindevcount=2
+</code></pre><h4>执行文件检查任务(检查备份数并同步文件)</h4><pre><code> &gt; mogadm fsck reset  # 从头开始检查
+ &gt; mogadm fsck start
+</code></pre><h4>其它命令参照管理命令magadm help</h4><pre><code>&gt; mogadm
+Usage:  (enter any command prefix, leaving off options, for further help)
+
+  mogadm check                     Check the state of the MogileFS world.
+  mogadm stats                     Show MogileFS system statistics.  (DEPRECATED: use mogstats instead)
+  mogadm host ...
+         host add ...              Add a host to MogileFS.
+         host delete ...           Delete a host.
+         host list                 List all hosts.
+         host mark ...             Change the status of a host.  (equivalent to 'modify --status')
+         host modify ...           Modify a host's properties.
+  mogadm device ...
+         device add ...            Add a device to a host.
+         device list ...           List all devices, for each host.
+         device mark ...           Mark a device as {alive,dead,down,drain,readonly}
+         device modify ...         Modify a device's properties.
+         device summary ...        List the summary of devices, for each host.
+  mogadm domain ...
+         domain add ...            Add a domain (namespace)
+         domain delete ...         Delete a domain.
+         domain list               List all hosts.
+  mogadm class ...
+         class add ...             Add a file class to a domain.
+         class delete ...          Delete a file class from a domain.
+         class list                List all classes, for each domain.
+         class modify ...          Modify properties of a file class.
+  mogadm slave ...
+         slave add ...             Add a slave node for store usage
+         slave delete ...          Delete a slave node for store usage
+         slave list                List current store slave nodes.
+         slave modify ...          Modify a slave node for store usage
+  mogadm fsck ...
+         fsck clearlog             Clear the fsck log
+         fsck printlog             Display the fsck log
+         fsck reset ...            Reset fsck position back to the beginning
+         fsck start                Start (or resume) background fsck
+         fsck status               Show fsck status
+         fsck stop                 Stop (pause) background fsck
+         fsck taillog              Tail the fsck log
+  mogadm rebalance ...
+         rebalance policy ...      Add or adjust the current policy
+         rebalance reset           Reset an existing policy
+         rebalance settings        Display rebalance settings
+         rebalance start           Start a rebalance job
+         rebalance status          Show status of current rebalance job
+         rebalance stop            Stop a rebalance job
+         rebalance test            Show what devices the current policy would match
+  mogadm settings ...
+         settings list             List all server settings
+         settings set ...          Set server setting 'key' to 'value'.</code></pre></div>
+</body>
+</html>

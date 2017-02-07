@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="/bootstrap/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="/bootstrap/font-awesome.css">
+    <script src="/bootstrap/jquery-1.js"></script>
+    <script src="/bootstrap/bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="/template/default.css" />
+</head>
+<body>
+<div class="head">
+    <h1>Welcome Home</h1>
+    <div>Be hungry, be foolish @晓枫</div>
+</div>
+<div class="sidebar-menu">
+    <a href="/" class="nav-header menu-first collapsed"><i class="icon-user-md icon-large"></i> 首页</a>
+    <ul class="nav nav-list collapse menu-second"></ul>
+        <ul class="nav nav-list collapse menu-second in">
+                <li class=""><a href="/skill/lottery.html"><i class="icon-edit"></i> 关于抽奖的小程序</a></li>
+                <li class=""><a href="/skill/csrf.html"><i class="icon-edit"></i> 关于CSRF漏洞防范</a></li>
+                <li class=""><a href="/skill/mogilefs_1.html"><i class="icon-edit"></i> mogilefs文件系统</a></li>
+                <li class="active"><a href="/skill/mogilefs_2.html"><i class="icon-edit"></i> mogilefs安装与部署</a></li>
+                <li class=""><a href="/skill/mogilefs_3.html"><i class="icon-edit"></i> mogilefs集群配置说明</a></li>
+                <li class=""><a href="/skill/mogilefs_4.html"><i class="icon-edit"></i> mogilefs使用tips</a></li>
+            </ul>
+    </div>
+<div class="content"><h3>mogilefs安装与部署</h3><h4>安装</h4><h5>安装必要的扩展包</h5><pre><code>&gt; sudo apt-get install libmysqld-dev gcc make perlbal
+</code></pre><h5>退回perl版本至0.23</h5><pre><code>&gt; perl -MSys::Syscall -e 'print $Sys::Syscall::VERSION'
+0.25
+&gt; sudo wget https://raw.githubusercontent.com/miyagawa/cpanminus/master/cpanm -O /usr/bin/cpanm --no-check-certificate
+&gt; sudo chmod +x /usr/bin/cpanm
+&gt; cpanm http://search.cpan.org/CPAN/authors/id/B/BR/BRADFITZ/Sys-Syscall-0.23.tar.gz
+
+tips: 执行时若发现下载不了 可以先进入cpan install扩展 然后就发现可用源的地址 进行替换即可
+</code></pre><h5>使用cpan工具安装mogilefs</h5><pre><code>&gt; sudo perl -MCPAN -e &quot;install MogileFS&quot;
+&gt; sudo perl -MCPAN -e &quot;install MogileFS::Utils&quot;
+&gt; sudo perl -MCPAN -e &quot;install DBI&quot;
+&gt; sudo perl -MCPAN -e &quot;install DBD::mysql&quot;
+</code></pre><h4>配置(单机版)</h4><ol><li><p>创建数据库</p><pre><code>   mogdbsetup --dbhost=db_host --dbname=db_name --dbuser=username --dbpassword=dbpaswd
+</code></pre></li><li><p>创建tracker配置文件: /etc/mogilefs/mogilefsd.conf</p><pre><code>   例如(复制配置项时去掉注释)：
+       db_dsn = DBI:mysql:mogilefs_xinfang:host=10.126.216.47;port=3306;mysql_connect_timeout=5  #数据库配置
+       db_user = dbusername    #数据库用户名
+       db_pass = dbpassword    #数据库用户密码
+       conf_port = 7001           #tracker的监听端口
+       listener_jobs = 5      #子进程数
+       node_timeout = 5       #连接数据节点的潮湿时间
+       rebalance_ignore_missing = 1  #忽略数据移动导致的文件丢失
+</code></pre></li><li><p>创建store配置文件: /etc/mogilefs/mogstored.conf</p><pre><code>   例如(复制配置项时去掉注释)：
+       maxconns = 10000    ＃最大链接数
+       httplisten = 0.0.0.0:7500  ＃该数据节点启动的监听端口
+       mgmtlisten = 0.0.0.0:7501  ＃接受管理信息/状态查询的坚挺端口
+       docroot = /var/mogdata     # 数据存储目录
+</code></pre></li><li><p>添加host & device</p><pre><code>   mogadm host add mogilestorage_new1 --ip=10.48.190.16 --port=7500 –-status=alive
+   mogadm device add mogilestorage_new1 1
+
+   说明：
+   &gt;mogadm host add &lt;hostname&gt;  --ip=节点ip  --port＝监听端口 --status=状态(alive down)
+   &gt;mogadm device add &lt;hostname&gt; &lt;devid&gt;
+
+   注：如果 dev目录不存在，需要建相关目录
+   &gt; mkdir /var/mogdata/dev1
+</code></pre></li><li><p>启动tracker & node</p><pre><code>   &gt; mogilefsd -c /etc/mogilefs/mogilefsd.conf --daemon --no_schema_check
+   &gt; mogstored --daemon
+</code></pre></li><li><p>验证安装结果</p><pre><code>   在tracker节点上检查新加入的节点是否可用 命令：
+       &gt; mogadm check
+       Checking trackers...
+         127.0.0.1:7001 ... OK
+
+       Checking hosts...
+         [ 1] mogilestorage183 ... skipping; status = dead
+         [ 2] mogilestorage020 ... skipping; status = dead
+         [ 3] mogilestorage_new_1 ... OK
+         [ 4] mogilestorage_new_2 ... OK
+         [ 5] mogilestorage_new_3 ... OK
+
+       Checking devices...
+         host device         size(G)    used(G)    free(G)   use%   ob state   I/O%
+         ---- ------------ ---------- ---------- ---------- ------ ---------- -----
+         [ 3] dev3           276.414    173.329    103.085  62.71%  writeable   N/A
+         [ 4] dev4           276.414    174.881    101.533  63.27%  writeable   N/A
+         [ 5] dev5           276.414     55.919    220.495  20.23%  writeable   N/A
+         ---- ------------ ---------- ---------- ---------- ------
+                    total:   829.242    404.129    425.113  48.73%
+
+   常见问题：
+       size列表为空： 启动store的用户有对数据存储目录的读写权限
+</code></pre></li></ol></div>
+</body>
+</html>

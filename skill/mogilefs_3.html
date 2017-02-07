@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="/bootstrap/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="/bootstrap/font-awesome.css">
+    <script src="/bootstrap/jquery-1.js"></script>
+    <script src="/bootstrap/bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="/template/default.css" />
+</head>
+<body>
+<div class="head">
+    <h1>Welcome Home</h1>
+    <div>Be hungry, be foolish @晓枫</div>
+</div>
+<div class="sidebar-menu">
+    <a href="/" class="nav-header menu-first collapsed"><i class="icon-user-md icon-large"></i> 首页</a>
+    <ul class="nav nav-list collapse menu-second"></ul>
+        <ul class="nav nav-list collapse menu-second in">
+                <li class=""><a href="/skill/lottery.html"><i class="icon-edit"></i> 关于抽奖的小程序</a></li>
+                <li class=""><a href="/skill/csrf.html"><i class="icon-edit"></i> 关于CSRF漏洞防范</a></li>
+                <li class=""><a href="/skill/mogilefs_1.html"><i class="icon-edit"></i> mogilefs文件系统</a></li>
+                <li class=""><a href="/skill/mogilefs_2.html"><i class="icon-edit"></i> mogilefs安装与部署</a></li>
+                <li class="active"><a href="/skill/mogilefs_3.html"><i class="icon-edit"></i> mogilefs集群配置说明</a></li>
+                <li class=""><a href="/skill/mogilefs_4.html"><i class="icon-edit"></i> mogilefs使用tips</a></li>
+            </ul>
+    </div>
+<div class="content"><h3>mogilefs集群配置说明</h3><pre><code>mogilefs文件系统由两部分组成: tacker &amp; node
+tracker 和 node 节点可以放在一台机器 也可以分开部署
+下边说说在已有的单机版基础上添加tracker &amp; node 节点过程
+</code></pre><h4>软件安装</h4><pre><code>参见安装与部署说明
+</code></pre><h4>mogilefs文件服务新增tracker步骤：</h4><pre><code>在已安装mogilefs的机器上修改文件：/etc/mogilefs/mogilefsd.conf
+    例如：
+        db_dsn = DBI:mysql:mogilefs_xinfang:host=10.106.21.47;port=3306;mysql_connect_timeout=5
+        db_user = dbusername
+        db_pass = dbpassword
+        conf_port = 7001
+        listener_jobs = 16
+        node_timeout = 5
+        rebalance_ignore_missing = 1
+</code></pre><pre><code>以work用户执行启动tracker命令：
+
+    &gt; mogilefsd -c /etc/mogilefs/mogilefsd.conf --daemon --no_schema_check
+</code></pre><pre><code>检查新增的tracker是否正常 在该机器上执行以下命令
+    &gt; mogadm check
+    Checking trackers...
+      127.0.0.1:7001 ... OK
+
+    Checking hosts...
+      [ 1] mogilestorage183 ... skipping; status = dead
+      [ 2] mogilestorage020 ... skipping; status = dead
+      [ 3] mogilestorage_new_1 ... OK
+      [ 4] mogilestorage_new_2 ... OK
+      [ 5] mogilestorage_new_3 ... OK
+
+    Checking devices...
+      host device         size(G)    used(G)    free(G)   use%   ob state   I/O%
+      ---- ------------ ---------- ---------- ---------- ------ ---------- -----
+      [ 3] dev3           276.414    173.329    103.085  62.71%  writeable   N/A
+      [ 4] dev4           276.414    174.881    101.533  63.27%  writeable   N/A
+      [ 5] dev5           276.414     55.919    220.495  20.23%  writeable   N/A
+      ---- ------------ ---------- ---------- ---------- ------
+                 total:   829.242    404.129    425.113  48.73%
+</code></pre><h4>mogilefs文件服务新增data node步骤：</h4><pre><code>在已安装mogilefs的机器上修改文件：/etc/mogilefs/mogstored.conf
+    例如:
+        maxconns = 10000
+        httplisten = 0.0.0.0:7500
+        mgmtlisten = 0.0.0.0:7501
+        docroot = /var/mogdata
+</code></pre><pre><code>在tracker机器上执行以下命令，将data node添加到集群中 命令：
+      mogadm host add mogilestorage_new_1 --ip=10.48.190.16 --port=7500 –-status=alive
+      mogadm device add mogilestorage_new_2 2
+
+      说明：
+      &gt;mogadm host add &lt;hostname&gt;  --ip=节点ip  --port＝监听端口 --status=状态(alive down)
+      &gt;mogadm device add &lt;hostname&gt; &lt;devid&gt;
+
+      注：如果 dev目录不存在，需要建相关目录
+      &gt; mkdir /var/mogdata/dev1
+      &gt; mkdir /var/mogdata/dev2
+</code></pre><pre><code>启动data node节点， 命令：
+    &gt; mogstored --daemon
+</code></pre><pre><code>在tracker节点上检查新加入的节点是否可用 命令：
+    &gt; mogadm check
+    Checking trackers...
+      127.0.0.1:7001 ... OK
+
+    Checking hosts...
+      [ 1] mogilestorage183 ... skipping; status = dead
+      [ 2] mogilestorage020 ... skipping; status = dead
+      [ 3] mogilestorage_new_1 ... OK
+      [ 4] mogilestorage_new_2 ... OK
+      [ 5] mogilestorage_new_3 ... OK
+
+    Checking devices...
+      host device         size(G)    used(G)    free(G)   use%   ob state   I/O%
+      ---- ------------ ---------- ---------- ---------- ------ ---------- -----
+      [ 3] dev3           276.414    173.329    103.085  62.71%  writeable   N/A
+      [ 4] dev4           276.414    174.881    101.533  63.27%  writeable   N/A
+      [ 5] dev5           276.414     55.919    220.495  20.23%  writeable   N/A
+      ---- ------------ ---------- ---------- ---------- ------
+                 total:   829.242    404.129    425.113  48.73%
+
+    常见问题：
+         size列表为空： 确保数据存储目录可读写744
+</code></pre><pre><code>新增node后手动rebalance（不是必须操作，根据实际情况而定）
+
+    设置rebalance策略命令：
+    mogadm rebalance policy --options=&quot;from_percent_used=50 to_percent_free=70 limit_type=device limit_by=size limit=20g&quot;
+
+    说明:
+        from_percent_used 指定从哪些机器上转移文件 50表示存储超过50%
+        to_percent_free  将文件移动到哪些机器  70表示存储空置超过70%
+        limit 文件转移大小限制 20g表示20GB
+        策略其他参数参见底部引用链接
+
+    设置好策略后执行rebalance操作命令：
+    &gt; mogadm rebalance start
+
+    查看rebalane执行状态
+    &gt; mogadm rebalance status
+
+    确定rebalance执行结束后，需要执行文件检查修复命令：
+    &gt; mogadm fsck reset
+    &gt; mogadm fsck start</code></pre></div>
+</body>
+</html>
